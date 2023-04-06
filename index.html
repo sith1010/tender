@@ -1,0 +1,342 @@
+<html>
+    <head>
+        <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    </head>
+    <style>
+        table, th, td {
+            border: 1px solid;
+        }
+        .max {
+             color: blue;
+        }
+        .min {
+            color: red;
+        }
+        </style>
+<body>
+    <input type="file" id="input1">
+    <input type="file" id="input2">
+    <input type="file" id="input3">
+    <input type="file" id="input4">
+    <button id="view1">View File1</button>
+    <button id="view2">View File2</button>
+    <button id="view3">View File3</button>
+    <button id="view4">View File4</button>
+    <button id="compare">Compare</button>
+    <table id="tbl1" style="display: none;"></table>
+    <table id="tbl2" style="display: none;"></table>
+    <table id="tbl3" style="display: none;"></table>
+    <table id="tbl4" style="display: none;"></table>
+    <div id="div3" style="display: none;">
+        <table id="tbl5" style="width:100%;display: inline-block;float:left;"></table>
+        <table id="tbl6" style="width:20%;display:inline-block;"></table>
+        <table id="tbl7" style="width:20%;display:inline-block;"></table>
+        <table id="tbl8" style="width:19.5%;display:inline-block;"></table>
+        <table id="tbl9" style="width:20%;display:inline-block;float:right;"></table>
+    </div>
+    
+</body>
+</html>
+<script>
+    var input1 = document.getElementById('input1');
+    var click1 = document.getElementById('view1');
+    var input2 = document.getElementById('input2');
+    var click2 = document.getElementById('view2');
+    var input3 = document.getElementById('input3');
+    var click3 = document.getElementById('view3');
+    var input4 = document.getElementById('input4');
+    var click4 = document.getElementById('view4');
+    var table1 = document.getElementById('tbl1');
+    var table2 = document.getElementById('tbl2');
+    var table3 = document.getElementById('tbl3');
+    var table4 = document.getElementById('tbl4');
+    var table5 = document.getElementById('tbl5');
+    var table6 = document.getElementById('tbl6');
+    var table7 = document.getElementById('tbl7');
+    var table8 = document.getElementById('tbl8');
+    var table9 = document.getElementById('tbl9');
+    var div3 = document.getElementById('div3');
+    input1.addEventListener('change',displayTbl1,false);
+    click1.addEventListener('click',displayTbl1,false);
+    function displayTbl1(event){
+        table2.style.display = 'none';
+        table1.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input1.files[0]).then(function(data){
+           var i = 0;
+           data.map((row,index)=>{
+            if(i==0){
+                let table = document.getElementById('tbl1');
+                generateTableHead(table,row);
+            }
+            if(i>0){
+                if(row[1]){
+                let table=document.getElementById('tbl1');
+                generateTableRows(table,row);
+            }}
+            i = i + 1;
+           });
+        });
+    }
+    input2.addEventListener('change',displayTbl2,false);
+    click2.addEventListener('click',displayTbl2,false);
+    function displayTbl2(event){
+        table1.style.display = 'none';
+        table2.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input2.files[0]).then(function(data){
+           var i = 0;
+           data.map((row,index)=>{
+            if(i==0){
+                let table = document.getElementById('tbl2');
+                generateTableHead(table,row);
+            }
+            if(i>0){
+                if(row[1]){
+                let table=document.getElementById('tbl2');
+                generateTableRows(table,row);
+            }}
+            i = i + 1;
+           });
+        });
+    }
+    input3.addEventListener('change',displayTbl3,false);
+    click3.addEventListener('click',displayTbl3,false);
+    function displayTbl3(event){
+        table1.style.display = 'none';
+        table3.style.display = 'block';
+        div3.style.display = 'none';
+        table2.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input3.files[0]).then(function(data){
+           var i = 0;
+           data.map((row,index)=>{
+            if(i==0){
+                let table = document.getElementById('tbl3');
+                generateTableHead(table,row);
+            }
+            if(i>0){
+                if(row[1]){
+                let table=document.getElementById('tbl3');
+                generateTableRows(table,row);}
+            }
+            i = i + 1;
+           });
+        });
+    }
+    input4.addEventListener('change',displayTbl4,false);
+    click4.addEventListener('click',displayTbl4,false);
+    function displayTbl4(event){
+        table1.style.display = 'none';
+        table4.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table2.style.display = 'none';
+        readXlsxFile(input4.files[0]).then(function(data){
+           var i = 0;
+           data.map((row,index)=>{
+            if(i==0){
+                let table = document.getElementById('tbl4');
+                generateTableHead(table,row);
+            }
+            if(i>0){
+                if(row[1]){
+                let table=document.getElementById('tbl4');
+                generateTableRows(table,row);
+            }}
+            i = i + 1;
+           });
+        });
+    }
+    function generateTableHead(table,data){
+        let thead=table.createTHead();
+        let row=thead.insertRow();
+        for(let key of data){
+            let th=document.createElement('th');
+            if(!key){
+                key='';
+            }
+            let text=document.createTextNode(key);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+    }
+    function generateTableRows(table,data){
+        //console.log(data);
+        let newRow=table.insertRow(-1);
+       data.map((row,index) =>{
+            let newCell = newRow.insertCell();
+            if(!row){
+                row='';
+            }
+            let newText = document.createTextNode(row);
+            newCell.appendChild(newText);
+        });
+    }
+    function generateRow(table,data1,data2,data3,data4,data5){
+        let newRow=table.insertRow(-1);
+        let newCell = newRow.insertCell(0);
+        let newText = document.createTextNode(data1);
+        newCell.appendChild(newText);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+        var cell5 = newRow.insertCell(4);
+        cell2.appendChild(document.createTextNode(data2));
+        cell3.appendChild(document.createTextNode(data3));
+        cell4.appendChild(document.createTextNode(data4));
+        cell5.appendChild(document.createTextNode(data5));
+    }
+    function drawTable(data){
+        //console.log('drawtable');
+        $('#tbl5').append($('<tr>').append(data));
+    }
+    var comp = document.getElementById("compare");
+    comp.addEventListener('click',function(){
+        table1.style.display = 'none';
+        div3.style.display = 'block';
+        table2.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        if(!table5.innerHTML){
+        compareTables(table1,table2,table3,table4);
+        colorRows();
+    }
+    });
+    function colorRows(){
+        var cols = [];
+        var trs = $('#tbl5 tr');
+        var cnt = 0;
+        var dup = 0;
+        var flag = 0;
+        var data =$.each(trs , function(index, tr){
+            lastButOne = $(tr).children("td").length - 2;
+            $.each($(tr).find("td").eq(lastButOne), function(index, td){
+            if(dup%4 == 0){
+                cnt = cnt + 1;
+            }
+            if($.isNumeric($(td).text())){
+            cols[cnt] = cols[cnt] || [];
+            cols[cnt].push($(td).text());
+            dup = dup + 1;
+        }});
+        });
+        console.log(cols);
+        cols.forEach(function(col, index){
+            var max = Math.max.apply(null, col);
+            var min = Math.min.apply(null, col);
+            $('#tbl5 tr:eq('+(index)+')').find('td').each(function(i, td){
+            $(td).toggleClass('max', +$(td).text() === max);
+            $(td).toggleClass('min', +$(td).text() === min); 
+            });
+    });
+    }
+    function compareTables(t1, t2,t3,t4){
+    var t2rows = $(t2).find('thead > tr');
+    var t1rows = $(t1).find('thead > tr');
+    var t3rows = $(t3).find('thead > tr');
+    var t4rows = $(t4).find('thead > tr');
+    var file1 = $('#input1').val().split('\\').pop();
+    var file2 = $('#input2').val().split('\\').pop();
+    var file3 = $('#input3').val().split('\\').pop();
+    var file4 = $('#input4').val().split('\\').pop();
+    //generateRow(table5,'',file1,file2,file3,file4);
+   $(t1).find('thead > tr').each(function(index){
+        var t1row = $(this);
+        var t2row = $(t2rows[index]);
+        var t3row = $(t3rows[index]);
+        var t4row = $(t4rows[index]);
+        //var t2tds = t2row.find('th');
+        //console.log($(this));
+       // $(t1row).each(function(index){
+            if(($(this).text().trim() != $(t2rows[index]).text().trim()) || ($(this).text().trim() != $(t3rows[index]).text().trim()) || ($(this).text().trim() != $(t4rows[index]).text().trim()) || 
+            ($(t2rows[index]).text().trim() != $(t3rows[index]).text().trim()) || ($(t2rows[index]).text().trim() != $(t4rows[index]).text().trim()) || ($(t4rows[index]).text().trim() != $(t3rows[index]).text().trim())){
+                //console.log('difference: table1:('+$(this).html()+')  table2:('+$(t2rows[index]).html()+') table3:('+$(t3rows[index]).html()+') table4:('+$(t4rows[index]).html()+')');
+                var r1 = replaceTags($(this).html());
+                var r2 = replaceTags($(t2rows[index]).html());
+                var r3 = replaceTags($(t3rows[index]).html());
+                var r4 = replaceTags($(t4rows[index]).html());
+                if(index == 0){
+                    drawTable($(this).html()); 
+                }
+                else{
+                //findMaxMin($(this).html().eq(6),$(t2rows[index]).html().eq(6),$(t3rows[index]).html().eq(6),$(t4rows[index]).html().eq(6));
+                drawTable('<td>' + file1 + '</td>');
+                drawTable($(this).html());
+                drawTable('<td>' + file2 + '</td>');
+                drawTable($(t2rows[index]).html());
+                drawTable('<td>' + file3 + '</td>');
+                drawTable($(t3rows[index]).html());
+                drawTable('<td>' + file4 + '</td>');
+                drawTable($(t4rows[index]).html());}
+                //console.log(r1);
+                //console.log(r1);
+                //console.log(r2);
+                //compareRows(r1,r2,r3,r4);
+                //generateRow(table3,r1);
+                //generateRow(table4,r2);
+            }
+       // });
+
+    });
+}
+function findMaxMin(r1,r2,r3,r4){
+    console.log(r1);
+}
+function compareRows(r1,r2,r3,r4){
+    var r2rows = $(r2).get();
+    var r1rows = $(r1).get();
+    var r3rows = $(r3).get();
+    var r4rows = $(r4).get();
+    var appdText = '';
+    r1rows.forEach(function(cont,index){
+        if(cont){
+        var max = 0;
+        var min = 0;
+        var r1Element = cont;
+        var r2Element = r2rows[index] || '<td>';
+        var r3Element = r3rows[index] || '<td>';
+        var r4Element = r4rows[index] || '<td>';
+        console.log(r2Element);
+        var r1Text = replaceTags((r1Element.innerText || '<td>'));
+        var r2Text = replaceTags((r2Element.innerText || '<td>'));
+        var r3Text = replaceTags((r3Element.innerText || '<td>'));
+        var r4Text = replaceTags((r4Element.innerText || '<td>'));
+        //console.log(r1Text);
+        //console.log(r2Text);
+        if(r1Text != r2Text){
+            //var txt = appdText + r1Text +  r2Text +  r3Text;
+            //generateRow(table6,r1Text);
+            //generateRow(table7,r2Text);
+            //generateRow(table8,r3Text);
+            //generateRow(table9,r4Text);
+            generateRow(table5,appdText,r1Text,r2Text,r3Text,r4Text);
+            appdText = '';
+        }
+        else{
+            //generateRow(table4,'');
+            //generateRow(table5,'');
+            //generateRow(table3,r1Text);
+            appdText = appdText + r1Text;
+        }}
+    });
+}
+function replaceTags(ele){
+    if(typeof ele === undefined){
+        return '';
+    }
+    else{
+    ele = ele.replaceAll('<th>',' ').trim();
+    ele = ele.replaceAll('</th>','').trim();
+    ele = ele.replaceAll('</th><th>',' ').trim();
+    ele = ele.replaceAll('<td>',' ').trim();
+    ele = ele.replaceAll('</td><td>',' ').trim();
+    ele = ele.replaceAll('</td>','').trim();
+    return ele;}
+}
+</script>

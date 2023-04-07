@@ -1,0 +1,326 @@
+<html>
+    <head>
+        <script src="https://unpkg.com/read-excel-file@5.6.1/bundle/read-excel-file.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    </head>
+    <style>
+        table, th, td {
+            border: 1px solid;
+        }
+        .max {
+             color: blue;
+        }
+        .min {
+            color: red;
+        }
+        </style>
+<body>
+    <input type="file" id="input1">
+    <input type="file" id="input2">
+    <input type="file" id="input3">
+    <input type="file" id="input4">
+    <button id="view1">View File1</button>
+    <button id="view2">View File2</button>
+    <button id="view3">View File3</button>
+    <button id="view4">View File4</button>
+    <button id="compare">Compare</button>
+    <table id="tbl1" style="display: none;"></table>
+    <table id="tbl2" style="display: none;"></table>
+    <table id="tbl3" style="display: none;"></table>
+    <table id="tbl4" style="display: none;"></table>
+    <div id="div3" style="display: none;">
+        <table id="tbl5" style="width:100%;display: inline-block;float:left;"></table>
+    </div>
+    
+</body>
+</html>
+<script>
+    var input1 = document.getElementById('input1');
+    var click1 = document.getElementById('view1');
+    var input2 = document.getElementById('input2');
+    var click2 = document.getElementById('view2');
+    var input3 = document.getElementById('input3');
+    var click3 = document.getElementById('view3');
+    var input4 = document.getElementById('input4');
+    var click4 = document.getElementById('view4');
+    var table1 = document.getElementById('tbl1');
+    var table2 = document.getElementById('tbl2');
+    var table3 = document.getElementById('tbl3');
+    var table4 = document.getElementById('tbl4');
+    var table5 = document.getElementById('tbl5');
+    var div3 = document.getElementById('div3');
+    tbl1Json = [];
+    tbl2Json = [];
+    tbl3Json = [];
+    tbl4Json = [];
+    var headers = [];
+    input1.addEventListener('change',displayTbl1,false);
+    click1.addEventListener('click',displayTbl1,false);
+    function displayTbl1(event){
+        table2.style.display = 'none';
+        table1.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        //var properties = parseProperties(getXmlFileContent('xl/workbook.xml'), xml);
+        //console.log(properties);
+        readXlsxFile(input1.files[0]).then(function(data){
+           data.map((row,index)=>{
+            if(row.includes('DESCRIPTION') || row.includes('DISCRIPTION OF ITEMS')){
+                headers = row;
+            }
+            let table=document.getElementById('tbl1');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']='file1';
+                var i = 0;
+                while(i<row.length){
+                    let j = i + 1;
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                tbl1Json.push(item);
+        }});
+        });
+        console.log(tbl1Json);
+    }
+    input2.addEventListener('change',displayTbl2,false);
+    click2.addEventListener('click',displayTbl2,false);
+    function displayTbl2(event){
+        table1.style.display = 'none';
+        table2.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input2.files[0]).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl2');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']='file2';
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file2';
+                tbl2Json.push(item);
+        }});
+        });
+        console.log(tbl2Json);
+    }
+    input3.addEventListener('change',displayTbl3,false);
+    click3.addEventListener('click',displayTbl3,false);
+    function displayTbl3(event){
+        table1.style.display = 'none';
+        table3.style.display = 'block';
+        div3.style.display = 'none';
+        table2.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input3.files[0]).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl3');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']='file3';
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file3';
+                tbl3Json.push(item);
+        }});
+        });
+        console.log(tbl3Json);
+    }
+    input4.addEventListener('change',displayTbl4,false);
+    click4.addEventListener('click',displayTbl4,false);
+    function displayTbl4(event){
+        table1.style.display = 'none';
+        table4.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table2.style.display = 'none';
+        readXlsxFile(input4.files[0]).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl4');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']='file4';
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file4';
+                tbl4Json.push(item);
+        }});
+        });
+        console.log(tbl4Json);
+    }
+    function generateTableRows(table,data){
+        let newRow=table.insertRow(-1);
+       data.map((row,index) =>{
+            let newCell = newRow.insertCell();
+            if(!row){
+                row='';
+            }
+            let newText = document.createTextNode(row);
+            newCell.appendChild(newText);
+        });
+    }
+    function generateTableHead(table,data){
+        let thead=table.createTHead();
+        let row=thead.insertRow();
+        for(let key of data){
+            let th=document.createElement('th');
+            let text=document.createTextNode(key);
+            th.appendChild(text);
+            row.appendChild(th);
+        }
+    }
+    var comp = document.getElementById("compare");
+    comp.addEventListener('click',function(){
+        table1.style.display = 'none';
+        div3.style.display = 'block';
+        table2.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        if(!table5.innerHTML){
+            if(tbl1Json.length > 0 & tbl2Json.length > 0 & tbl3Json.length > 0 & tbl4Json.length > 0){  
+                compareTables(4);}
+            else if (tbl1Json.length > 0 & tbl2Json.length > 0 & tbl3Json.length > 0){
+                compareTables(3);}
+            else if(tbl1Json.length > 0 & tbl2Json.length > 0){
+                compareTables(2);
+            }
+        //colorRows();
+    }
+    });
+    var isEqualsJson = (obj1,obj2)=>{
+    for(let rec of obj1){
+        delete(rec._0);
+    }
+    for(let rec of obj2){
+        delete(rec._0);
+    }
+    keys1 = Object.keys(obj1);
+    keys2 = Object.keys(obj2);
+    //console.log(obj1);
+    //console.log(obj2);
+    if(_.isEqual(obj1,obj2)){
+        return true;
+    }
+    else{
+        return false;
+    }
+    }   
+    var groupBy = function(xs, key) {
+    return xs.reduce(function(rv, x) {
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+    }, {});
+    };
+    function compareTables(val){
+        console.log(val);
+        var inputJson = [];
+        if(val == 2){
+        inputJson = $.merge( tbl1Json, tbl2Json);}
+        if(val == 3){
+        let tmpJson = $.merge( tbl1Json, tbl2Json);
+        inputJson = $.merge( tmpJson, tbl3Json);
+        }
+        if(val == 4){
+        let tmpJson1 = $.merge( tbl1Json, tbl2Json);
+        let tmpJson2 = $.merge( tbl3Json, tbl4Json);
+        inputJson = $.merge(tmpJson1,tmpJson2);
+        }
+        console.log('inside');
+        //headers = headers.replaceAll(null,'_');
+        generateTableHead(table5,headers);
+        /*var mergeJson = inputJson.reduce(function(result, current) {
+        result[current._2] = result[current._2] || [];
+        result[current._2].push(current);
+        return result;
+        }, {});*/
+        res = groupBy(inputJson,'_2');
+        //console.log(res);
+        keys = Object.keys(res);
+        for(const key of keys){
+            let tmp = groupBy(res[key],'_0');
+            //console.log(tmp);
+            innerKeys = Object.keys(tmp);
+            let diff = -1;
+            //console.log(innerKeys);
+            let xx = 0;
+            while(xx < val-1){
+                //console.log(xx);
+                if(isEqualsJson(tmp[innerKeys[xx]],tmp[innerKeys[xx + 1]])){
+                    diff = 0;
+                }
+                else{
+                    diff = 1;
+                }
+                xx = xx + 1;
+            }
+            if(diff == 1){
+            drawTable(table5,res[key]);}
+        }
+        /*var mergeJson2 = mergeJson.reduce(function(result, current) {
+        result[current._0] = result[current._0] || [];
+        result[current._0].push(current);
+        return result;
+        }, {});
+        console.log(mergeJson2);
+       keys = Object.keys(mergeJson);
+       for(const ele of keys){
+        //console.log(ele);
+            var x = 0;
+            while(x < mergeJson[ele].length-1){
+            if(isEqualsJson(mergeJson[ele][x],mergeJson[ele][x+1])){
+                let i =0;
+            }else{
+                var xx = mergeJson[ele].length/2;
+                let x1 = x2 = '';
+                let xflag = 0;
+                while(xflag <= xx){
+                let x1 = mergeJson[ele].slice(xflag,xflag+2);
+                let x2 = mergeJson[ele].slice(xflag+2,xflag+4);
+                if(JSON.stringify(x1) == JSON.stringify(x2)){
+                    let j = 0;
+                }
+                else{
+                    console.log(mergeJson[ele]);
+                    drawTable(table5,mergeJson[ele]);
+                }
+            xflag = xflag + 2;    
+            }
+
+            }
+        x = x + 1;}
+       }*/
+    }
+    function drawTable(table,recs){
+        for(let rec of recs){
+            let newRow=table.insertRow(-1);
+            let keys = Object.keys(rec);
+            for(let key of keys){
+                let newCell = newRow.insertCell();
+                let newText = document.createTextNode(rec[key]);
+                newCell.appendChild(newText);
+            }
+        }
+    }
+</script>

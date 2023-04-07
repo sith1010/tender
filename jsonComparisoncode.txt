@@ -3,11 +3,29 @@
         <script src="https://unpkg.com/read-excel-file@5.6.1/bundle/read-excel-file.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+        
     </head>
     <style>
-        table, th, td {
-            border: 1px solid;
-        }
+       tbody tr:nth-child(even) {
+  background-color: #eee;
+}
+
+tbody th {
+  background-color: #36c;
+  color: #fff;
+  text-align: left;
+}
+thead tr:nth-child(even) {
+  background-color: #eee;
+}
+
+thead th {
+  background-color: #36c;
+  color: #fff;
+  text-align: left;
+}
         .max {
              color: blue;
         }
@@ -16,6 +34,7 @@
         }
         </style>
 <body>
+    <select id="select1"></select>
     <input type="file" id="input1">
     <input type="file" id="input2">
     <input type="file" id="input3">
@@ -55,8 +74,33 @@
     tbl3Json = [];
     tbl4Json = [];
     var headers = [];
+    //const XLSX = require("xlsx");
     input1.addEventListener('change',displayTbl1,false);
     click1.addEventListener('click',displayTbl1,false);
+    function handleFile(e) {
+     //Get the files from Upload control
+        var files = e.target.files;
+        var i, f;
+        let sheet_name_list;
+     //Loop through files
+        f = files[0];
+            var reader = new FileReader();
+            var name = f.name;
+            reader.onload = function (e) {
+                var data = e.target.result;
+                var result;
+                var workbook = XLSX.read(data, { type: 'binary' });
+                sheet_name_list = workbook.SheetNames;
+                var selectBox = document.getElementById('select1');
+
+                for(var i = 0, l = sheet_name_list.length; i < l; i++){
+                var option = sheet_name_list[i];
+                selectBox.options.add( new Option(option) );
+                }
+                //sheet_name_list1 = sheet_name_list;
+            };
+            reader.readAsArrayBuffer(f);
+        }
     function displayTbl1(event){
         table2.style.display = 'none';
         table1.style.display = 'block';
@@ -65,6 +109,11 @@
         table4.style.display = 'none';
         //var properties = parseProperties(getXmlFileContent('xl/workbook.xml'), xml);
         //console.log(properties);
+        
+        //const wkb = XLSX.read(input1.files[0]);
+        //const worksheets = workbook.Sheets;
+        //console.log(worksheets);
+        handleFile(event);
         readXlsxFile(input1.files[0]).then(function(data){
            data.map((row,index)=>{
             if(row.includes('DESCRIPTION') || row.includes('DISCRIPTION OF ITEMS')){
@@ -74,17 +123,19 @@
             generateTableRows(table,row);
             if(row[1]){
                 let item = {};
-                item['_0']='file1';
+                item['_0']=($('#input1').val().split('\\').pop()).replace('.xlsx','');
                 var i = 0;
                 while(i<row.length){
                     let j = i + 1;
+                    if(row[i] == null){row[i]='';}
                    item['_'+j] = row[i];
                    i = i + 1;
                 }
                 tbl1Json.push(item);
         }});
+        headers.unshift('FileName');
         });
-        console.log(tbl1Json);
+        //console.log(tbl1Json);
     }
     input2.addEventListener('change',displayTbl2,false);
     click2.addEventListener('click',displayTbl2,false);
@@ -100,11 +151,12 @@
             generateTableRows(table,row);
             if(row[1]){
                 let item = {};
-                item['_0']='file2';
+                item['_0']=($('#input2').val().split('\\').pop()).replace('.xlsx','');
                 var i = 0;
                 //let item = {};
                 while(i<row.length){
                     let j = i + 1;
+                    if(row[i] == null){row[i]='';}
                    item['_'+j] = row[i];
                    i = i + 1;
                 }
@@ -112,7 +164,7 @@
                 tbl2Json.push(item);
         }});
         });
-        console.log(tbl2Json);
+        //console.log(tbl2Json);
     }
     input3.addEventListener('change',displayTbl3,false);
     click3.addEventListener('click',displayTbl3,false);
@@ -128,11 +180,12 @@
             generateTableRows(table,row);
             if(row[1]){
                 let item = {};
-                item['_0']='file3';
+                item['_0']=($('#input3').val().split('\\').pop()).replace('.xlsx','');
                 var i = 0;
                 //let item = {};
                 while(i<row.length){
                     let j = i + 1;
+                    if(row[i] == null){row[i]='';}
                    item['_'+j] = row[i];
                    i = i + 1;
                 }
@@ -140,7 +193,7 @@
                 tbl3Json.push(item);
         }});
         });
-        console.log(tbl3Json);
+        //console.log(tbl3Json);
     }
     input4.addEventListener('change',displayTbl4,false);
     click4.addEventListener('click',displayTbl4,false);
@@ -156,11 +209,12 @@
             generateTableRows(table,row);
             if(row[1]){
                 let item = {};
-                item['_0']='file4';
+                item['_0']=($('#input4').val().split('\\').pop()).replace('.xlsx','');
                 var i = 0;
                 //let item = {};
                 while(i<row.length){
                     let j = i + 1;
+                    if(row[i] == null){row[i]='';}
                    item['_'+j] = row[i];
                    i = i + 1;
                 }
@@ -168,7 +222,7 @@
                 tbl4Json.push(item);
         }});
         });
-        console.log(tbl4Json);
+        //console.log(tbl4Json);
     }
     function generateTableRows(table,data){
         let newRow=table.insertRow(-1);
@@ -216,10 +270,6 @@
     for(let rec of obj2){
         delete(rec._0);
     }
-    keys1 = Object.keys(obj1);
-    keys2 = Object.keys(obj2);
-    //console.log(obj1);
-    //console.log(obj2);
     if(_.isEqual(obj1,obj2)){
         return true;
     }
@@ -247,7 +297,7 @@
         let tmpJson2 = $.merge( tbl3Json, tbl4Json);
         inputJson = $.merge(tmpJson1,tmpJson2);
         }
-        console.log('inside');
+        //console.log('inside');
         //headers = headers.replaceAll(null,'_');
         generateTableHead(table5,headers);
         /*var mergeJson = inputJson.reduce(function(result, current) {
@@ -259,15 +309,17 @@
         //console.log(res);
         keys = Object.keys(res);
         for(const key of keys){
+           //console.log(res[key]);
             let tmp = groupBy(res[key],'_0');
             //console.log(tmp);
             innerKeys = Object.keys(tmp);
             let diff = -1;
-            //console.log(innerKeys);
             let xx = 0;
             while(xx < val-1){
                 //console.log(xx);
-                if(isEqualsJson(tmp[innerKeys[xx]],tmp[innerKeys[xx + 1]])){
+                let comp1Str = JSON.parse(JSON.stringify(tmp[innerKeys[xx]]));
+                let comp2Str = JSON.parse(JSON.stringify(tmp[innerKeys[xx + 1]]));
+                if(isEqualsJson(comp1Str,comp2Str)){
                     diff = 0;
                 }
                 else{
@@ -276,51 +328,71 @@
                 xx = xx + 1;
             }
             if(diff == 1){
-            drawTable(table5,res[key]);}
+            drawTable(table5,res[key]);
+            //colorTiles(table5,res[key]);
         }
-        /*var mergeJson2 = mergeJson.reduce(function(result, current) {
-        result[current._0] = result[current._0] || [];
-        result[current._0].push(current);
-        return result;
-        }, {});
-        console.log(mergeJson2);
-       keys = Object.keys(mergeJson);
-       for(const ele of keys){
-        //console.log(ele);
-            var x = 0;
-            while(x < mergeJson[ele].length-1){
-            if(isEqualsJson(mergeJson[ele][x],mergeJson[ele][x+1])){
-                let i =0;
-            }else{
-                var xx = mergeJson[ele].length/2;
-                let x1 = x2 = '';
-                let xflag = 0;
-                while(xflag <= xx){
-                let x1 = mergeJson[ele].slice(xflag,xflag+2);
-                let x2 = mergeJson[ele].slice(xflag+2,xflag+4);
-                if(JSON.stringify(x1) == JSON.stringify(x2)){
-                    let j = 0;
-                }
-                else{
-                    console.log(mergeJson[ele]);
-                    drawTable(table5,mergeJson[ele]);
-                }
-            xflag = xflag + 2;    
-            }
-
-            }
-        x = x + 1;}
-       }*/
+        }
     }
     function drawTable(table,recs){
+        let _5cols = [];
+        let _6cols = [];
+        let _7cols = [];
+        let _8cols = [];
+        for(let rec of recs){
+            //console.log(rec);
+        _5cols.push(rec['_5']);
+        _6cols.push(rec['_6']);
+        _7cols.push(rec['_7']);
+        _8cols.push(rec['_8']);
+        }
+        var valJson = {};
+        valJson['_5max'] = Math.max.apply(null, _5cols);
+        valJson['_5min'] = Math.min.apply(null, _5cols);
+        valJson['_6max'] = Math.max.apply(null, _6cols);
+        valJson['_6min'] = Math.min.apply(null, _6cols);
+        valJson['_7max'] = Math.max.apply(null, _7cols);
+        valJson['_7min'] = Math.min.apply(null, _7cols);
+        valJson['_8max'] = Math.max.apply(null, _8cols);
+        valJson['_8min'] = Math.min.apply(null, _8cols);
+        //console.log(_6cols);
+        let flag = 0;
         for(let rec of recs){
             let newRow=table.insertRow(-1);
             let keys = Object.keys(rec);
+            if(flag == 0){
             for(let key of keys){
                 let newCell = newRow.insertCell();
                 let newText = document.createTextNode(rec[key]);
                 newCell.appendChild(newText);
+                //console.log(Object.getOwnPropertyNames(newText));
+                let x=5;
+                while(x<9){
+                let cnMax = '_'+x+'max';
+                let cnMin = '_'+x+'min';
+                if(key == '_'+x){if(rec[key] === valJson[cnMax]){newCell.className = 'max';}
+                if(rec[key] === valJson[cnMin]){newCell.className = 'min';}}
+                x = x + 1;
+                }}
+                flag = 1;}
+                else{
+                    for(let key of keys){
+                    if(key == '_2' || key == '_1'){
+                        rec[key]='';
+                    }
+                        let newCell = newRow.insertCell();
+                        let newText = document.createTextNode(rec[key]);
+                        newCell.appendChild(newText);
+                        //console.log(Object.getOwnPropertyNames(newText));
+                        let x=5;
+                        while(x<9){
+                        let cnMax = '_'+x+'max';
+                        let cnMin = '_'+x+'min';
+                        if(key == '_'+x){if(rec[key] === valJson[cnMax]){newCell.className = 'max';}
+                        if(rec[key] === valJson[cnMin]){newCell.className = 'min';}}
+                        x = x + 1;
+                        }
+                    }
+                }
             }
         }
-    }
 </script>

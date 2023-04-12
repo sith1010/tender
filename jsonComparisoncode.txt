@@ -34,7 +34,8 @@ thead th {
         }
         </style>
 <body>
-    <select id="select1"></select>
+    Select a sheetname to compare:<select id="select1"></select>
+    Select the columns to compare:<select multiple id="select2"></select>
     <input type="file" id="input1">
     <input type="file" id="input2">
     <input type="file" id="input3">
@@ -69,14 +70,17 @@ thead th {
     var table4 = document.getElementById('tbl4');
     var table5 = document.getElementById('tbl5');
     var div3 = document.getElementById('div3');
+    var select1 = document.getElementById('select1');
     tbl1Json = [];
     tbl2Json = [];
     tbl3Json = [];
     tbl4Json = [];
     var headers = [];
+    var columnHeaders = [];
     //const XLSX = require("xlsx");
     input1.addEventListener('change',displayTbl1,false);
     click1.addEventListener('click',displayTbl1,false);
+    select1.addEventListener('change',readSheet,false);
     function handleFile(e) {
      //Get the files from Upload control
         var files = e.target.files;
@@ -92,32 +96,38 @@ thead th {
                 var workbook = XLSX.read(data, { type: 'binary' });
                 sheet_name_list = workbook.SheetNames;
                 var selectBox = document.getElementById('select1');
-
                 for(var i = 0, l = sheet_name_list.length; i < l; i++){
                 var option = sheet_name_list[i];
-                selectBox.options.add( new Option(option) );
+                selectBox.options.add( new Option(option,option,option) );
                 }
                 //sheet_name_list1 = sheet_name_list;
             };
             reader.readAsArrayBuffer(f);
         }
-    function displayTbl1(event){
+        function displayTbl1WithSheet(sheetName){
+        tbl1Json = []
+        $("#tbl1 tr").remove(); 
         table2.style.display = 'none';
         table1.style.display = 'block';
         div3.style.display = 'none';
         table3.style.display = 'none';
         table4.style.display = 'none';
+        var selectBox = document.getElementById('select2');
         //var properties = parseProperties(getXmlFileContent('xl/workbook.xml'), xml);
         //console.log(properties);
         
         //const wkb = XLSX.read(input1.files[0]);
         //const worksheets = workbook.Sheets;
         //console.log(worksheets);
-        handleFile(event);
-        readXlsxFile(input1.files[0]).then(function(data){
+        //handleFile(event);
+        readXlsxFile(input1.files[0],{ sheet: sheetName}).then(function(data){
            data.map((row,index)=>{
-            if(row.includes('DESCRIPTION') || row.includes('DISCRIPTION OF ITEMS')){
+            if(row.includes('DESCRIPTION') || row.includes('DESCRIPTION OF ITEMS') || row.includes('DISCRIPTION OF ITEMS')|| row.includes('DISCRIPTION')){
                 headers = row;
+                for (var i = 65; i < (65 + row.length); i++) {
+                     columnHeaders.push(String.fromCharCode(i));
+                     selectBox.options.add( new Option(String.fromCharCode(i),'_'+(i-64),String.fromCharCode(i)) );
+            }
             }
             let table=document.getElementById('tbl1');
             generateTableRows(table,row);
@@ -133,13 +143,58 @@ thead th {
                 }
                 tbl1Json.push(item);
         }});
-        headers.unshift('FileName');
+        //headers.unshift('FileName');
+        });
+        //console.log(tbl1Json);
+    }
+    function displayTbl1(event){
+        tbl1Json = []
+        $("#tbl1 tr").remove(); 
+        table2.style.display = 'none';
+        table1.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        var selectBox = document.getElementById('select2');
+        //var properties = parseProperties(getXmlFileContent('xl/workbook.xml'), xml);
+        //console.log(properties);
+        
+        //const wkb = XLSX.read(input1.files[0]);
+        //const worksheets = workbook.Sheets;
+        //console.log(worksheets);
+        handleFile(event);
+        readXlsxFile(input1.files[0]).then(function(data){
+           data.map((row,index)=>{
+            if(row.includes('DESCRIPTION') || row.includes('DESCRIPTION OF ITEMS') || row.includes('DISCRIPTION OF ITEMS')|| row.includes('DISCRIPTION')){
+                headers = row;
+                for (var i = 65; i < (65 + row.length); i++) {
+                     columnHeaders.push(String.fromCharCode(i));
+                     selectBox.options.add( new Option(String.fromCharCode(i),'_'+(i-64),String.fromCharCode(i)) );
+            }
+            }
+            let table=document.getElementById('tbl1');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']=($('#input1').val().split('\\').pop()).replace('.xlsx','');
+                var i = 0;
+                while(i<row.length){
+                    let j = i + 1;
+                    if(row[i] == null){row[i]='';}
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                tbl1Json.push(item);
+        }});
+        //headers.unshift('FileName');
         });
         //console.log(tbl1Json);
     }
     input2.addEventListener('change',displayTbl2,false);
     click2.addEventListener('click',displayTbl2,false);
     function displayTbl2(event){
+        tbl2Json = []
+        $("#tbl2 tr").remove(); 
         table1.style.display = 'none';
         table2.style.display = 'block';
         div3.style.display = 'none';
@@ -164,11 +219,42 @@ thead th {
                 tbl2Json.push(item);
         }});
         });
-        //console.log(tbl2Json);
+       // console.log(tbl2Json);
+    }
+    function displayTbl2withSheet(sheetName){
+        tbl2Json = []
+        $("#tbl2 tr").remove(); 
+        table1.style.display = 'none';
+        table2.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input2.files[0],{ sheet: sheetName}).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl2');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']=($('#input2').val().split('\\').pop()).replace('.xlsx','');
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                    if(row[i] == null){row[i]='';}
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file2';
+                tbl2Json.push(item);
+        }});
+        });
+       // console.log(tbl2Json);
     }
     input3.addEventListener('change',displayTbl3,false);
     click3.addEventListener('click',displayTbl3,false);
     function displayTbl3(event){
+        tbl3Json = []
+        $("#tbl3 tr").remove(); 
         table1.style.display = 'none';
         table3.style.display = 'block';
         div3.style.display = 'none';
@@ -195,15 +281,75 @@ thead th {
         });
         //console.log(tbl3Json);
     }
+    function displayTbl3WithSheet(sheetName){
+        tbl3Json = []
+        $("#tbl3 tr").remove(); 
+        table1.style.display = 'none';
+        table3.style.display = 'block';
+        div3.style.display = 'none';
+        table2.style.display = 'none';
+        table4.style.display = 'none';
+        readXlsxFile(input3.files[0], {sheet: sheetName}).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl3');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']=($('#input3').val().split('\\').pop()).replace('.xlsx','');
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                    if(row[i] == null){row[i]='';}
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file3';
+                tbl3Json.push(item);
+        }});
+        });
+        //console.log(tbl3Json);
+    }
     input4.addEventListener('change',displayTbl4,false);
     click4.addEventListener('click',displayTbl4,false);
     function displayTbl4(event){
+        tbl4Json = []
+        $("#tbl4 tr").remove();
         table1.style.display = 'none';
         table4.style.display = 'block';
         div3.style.display = 'none';
         table3.style.display = 'none';
         table2.style.display = 'none';
         readXlsxFile(input4.files[0]).then(function(data){
+            data.map((row,index)=>{
+            let table=document.getElementById('tbl4');
+            generateTableRows(table,row);
+            if(row[1]){
+                let item = {};
+                item['_0']=($('#input4').val().split('\\').pop()).replace('.xlsx','');
+                var i = 0;
+                //let item = {};
+                while(i<row.length){
+                    let j = i + 1;
+                    if(row[i] == null){row[i]='';}
+                   item['_'+j] = row[i];
+                   i = i + 1;
+                }
+                //item['_'+i]='file4';
+                tbl4Json.push(item);
+        }});
+        });
+        //console.log(tbl4Json);
+    }
+    function displayTbl4WithSheet(sheetName){
+        tbl4Json = []
+        $("#tbl4 tr").remove(); 
+        table1.style.display = 'none';
+        table4.style.display = 'block';
+        div3.style.display = 'none';
+        table3.style.display = 'none';
+        table2.style.display = 'none';
+        readXlsxFile(input4.files[0], {sheet: sheetName}).then(function(data){
             data.map((row,index)=>{
             let table=document.getElementById('tbl4');
             generateTableRows(table,row);
@@ -235,18 +381,48 @@ thead th {
             newCell.appendChild(newText);
         });
     }
-    function generateTableHead(table,data){
+    function generateTableHead(table,data,val,selectedCols){
         let thead=table.createTHead();
-        let row=thead.insertRow();
+        let fileRow=thead.insertRow(-1);
+        let th=document.createElement('td');
+        let fileText = document.createTextNode('');
+        th.colSpan = 5;
+        th.appendChild(fileText);
+        fileRow.appendChild(th);
+        let row=thead.insertRow(0);
+        let j = 0;
+        while(j < val){
+            let th=document.createElement('th');
+            let htmlObj = '#input' + (j+1);
+            let text=document.createTextNode(($(htmlObj).val().split('\\').pop()).replace('.xlsx',''));
+            th.appendChild(text);
+            th.colSpan = selectedCols.length;
+            fileRow.appendChild(th);
+            j = j + 1;
+        }
         for(let key of data){
             let th=document.createElement('th');
             let text=document.createTextNode(key);
             th.appendChild(text);
             row.appendChild(th);
         }
+        let i = 1;
+        while(i < val){
+            for( let key of selectedCols){
+                let th=document.createElement('th');
+                //console.log(data[key.replace('_','')])
+                let text=document.createTextNode(data[(Number(key.replace('_',''))-1)]);
+                th.appendChild(text);
+                row.appendChild(th);
+            }
+            i = i + 1;
+        }
+
     }
     var comp = document.getElementById("compare");
     comp.addEventListener('click',function(){
+        var selectedCols = $('#select2').val();
+        //console.log(selectedCols);
         table1.style.display = 'none';
         div3.style.display = 'block';
         table2.style.display = 'none';
@@ -254,23 +430,56 @@ thead th {
         table4.style.display = 'none';
         if(!table5.innerHTML){
             if(tbl1Json.length > 0 & tbl2Json.length > 0 & tbl3Json.length > 0 & tbl4Json.length > 0){  
-                compareTables(4);}
+                compareTables(4,selectedCols);}
             else if (tbl1Json.length > 0 & tbl2Json.length > 0 & tbl3Json.length > 0){
-                compareTables(3);}
+                compareTables(3,selectedCols);}
             else if(tbl1Json.length > 0 & tbl2Json.length > 0){
-                compareTables(2);
+                compareTables(2,selectedCols);
             }
         //colorRows();
     }
     });
-    var isEqualsJson = (obj1,obj2)=>{
+    var isEqualsJson = (obj1,obj2,selectedCols)=>{
+    //var selectCols = Object.keys(obj1[0]).filter(x => !selectedCols.includes(x));
+    //console.log(Object.keys(obj1[0]));
+    //console.log(selectedCols);
+    //console.log(removeCols);
+    let item1 = [];
+    let item2 = [];
+    let dup1 = {};
+    let dup2 = {};
     for(let rec of obj1){
-        delete(rec._0);
+        //console.log(rec);
+        for(let arec of selectedCols){
+            //console.log(rec);
+            //console.log(arec);
+            dup1[arec] = rec[arec];
+            //dup2[arec] = obj2[arec];
+        }
+        item1.push(dup1);
+        //item2.push(dup2);
     }
     for(let rec of obj2){
-        delete(rec._0);
+        //console.log(rec);
+        for(let arec of selectedCols){
+            //console.log(rec);
+            //console.log(arec);
+            //dup1[arec] = rec[arec];
+            dup2[arec] = rec[arec];
+        }
+        //item1.push(dup1);
+        item2.push(dup2);
     }
-    if(_.isEqual(obj1,obj2)){
+    console.log(item1);
+    console.log(item2);
+    /*for(let rec of obj2){
+        for(let arec of removeCols){
+            delete(rec[arec]);
+        }
+    }*/
+    //console.log(obj1);
+    //console.log(obj2);
+    if(_.isEqual(item1,item2)){
         return true;
     }
     else{
@@ -283,8 +492,8 @@ thead th {
     return rv;
     }, {});
     };
-    function compareTables(val){
-        console.log(val);
+    function compareTables(val,selectedCols){
+        //console.log(val);
         var inputJson = [];
         if(val == 2){
         inputJson = $.merge( tbl1Json, tbl2Json);}
@@ -299,7 +508,7 @@ thead th {
         }
         //console.log('inside');
         //headers = headers.replaceAll(null,'_');
-        generateTableHead(table5,headers);
+        generateTableHead(table5,headers,val,selectedCols);
         /*var mergeJson = inputJson.reduce(function(result, current) {
         result[current._2] = result[current._2] || [];
         result[current._2].push(current);
@@ -319,27 +528,45 @@ thead th {
                 //console.log(xx);
                 let comp1Str = JSON.parse(JSON.stringify(tmp[innerKeys[xx]]));
                 let comp2Str = JSON.parse(JSON.stringify(tmp[innerKeys[xx + 1]]));
-                if(isEqualsJson(comp1Str,comp2Str)){
+                if(isEqualsJson(comp1Str,comp2Str,selectedCols)){
                     diff = 0;
                 }
                 else{
                     diff = 1;
+                    break;
                 }
                 xx = xx + 1;
             }
             if(diff == 1){
-            drawTable(table5,res[key]);
+            //console.log(res[key]);
+            let res1 = [];
+            let res2 = []
+            if(res[key].length > val){
+                let j = 0;
+                while(j < res[key].length){
+                    if(res[key][j]){
+                    res1.push(res[key][j]);}
+                    if(res[key][j+1]){
+                    res2.push(res[key][j+1])};
+                    j = j + 2;
+                }
+                //console.log(res1);
+                //console.log(res2);
+                drawTable(table5,res1,selectedCols);
+                drawTable(table5,res2,selectedCols);  
+            }else{
+            drawTable(table5,res[key],selectedCols);}
             //colorTiles(table5,res[key]);
         }
         }
     }
-    function drawTable(table,recs){
+    function drawTable(table,recs,selectedCols){
         let _5cols = [];
         let _6cols = [];
         let _7cols = [];
         let _8cols = [];
         for(let rec of recs){
-            //console.log(rec);
+        //console.log(rec);
         _5cols.push(rec['_5']);
         _6cols.push(rec['_6']);
         _7cols.push(rec['_7']);
@@ -356,8 +583,10 @@ thead th {
         valJson['_8min'] = Math.min.apply(null, _8cols);
         //console.log(_6cols);
         let flag = 0;
+        let newRow=table.insertRow(-1);
         for(let rec of recs){
-            let newRow=table.insertRow(-1);
+            delete(rec._0);
+            //console.log(rec);
             let keys = Object.keys(rec);
             if(flag == 0){
             for(let key of keys){
@@ -375,10 +604,9 @@ thead th {
                 }}
                 flag = 1;}
                 else{
+                    //console.log(selectedCols);
                     for(let key of keys){
-                    if(key == '_2' || key == '_1'){
-                        rec[key]='';
-                    }
+                    if(selectedCols.includes(key)){
                         let newCell = newRow.insertCell();
                         let newText = document.createTextNode(rec[key]);
                         newCell.appendChild(newText);
@@ -391,8 +619,19 @@ thead th {
                         if(rec[key] === valJson[cnMin]){newCell.className = 'min';}}
                         x = x + 1;
                         }
-                    }
+                    }}
                 }
             }
+        }
+        function readSheet(event){
+            let sheetName = $(select1).val();
+            if(input1.files[0]){
+            displayTbl1WithSheet(sheetName);}
+            if(input2.files[0]){
+            displayTbl2withSheet(sheetName);}
+            if(input3.files[0]){
+            displayTbl3WithSheet(sheetName);}
+            if(input4.files[0]){
+            displayTbl4WithSheet(sheetName);}
         }
 </script>
